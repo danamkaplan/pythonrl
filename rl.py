@@ -13,6 +13,15 @@ MAP_HEIGHT = 45
 color_dark_wall = libtcod.Color(0,0,100)
 color_dark_ground = libtcod.Color(50,50,150)
 
+#dungeon building block rectangle class
+class Rect:
+    #a rectangle on the map, used to characterize a room
+    def __init__(self, x, y, w, h):
+        self.x1 = x
+        self.y1 = y
+        self.x2 = x + w
+        self.y2 = y + h
+
 #general map objects
 class Tile:
     #a tile of the map and its properties
@@ -54,14 +63,41 @@ def make_map():
     global map
 
     #fill map with "unblocked" tiles
-    map = [[Tile(False)
+    map = [[Tile(True)
         for y in range(MAP_HEIGHT)]
             for x in range(MAP_WIDTH)]
-    #two testing pillars        
-    map[30][22].blocked = True
-    map[30][22].block_sight = True
-    map[50][22].blocked = True
-    map[50][22].block_sight = True
+    
+    #two testing rooms
+    room1 = Rect(20, 15, 10, 15)
+    room2 = Rect(50, 15, 10, 15)
+    create_room(room1)
+    create_room(room2)
+    create_h_tunnel(25, 55, 23)
+    player.x = 25
+    player.y = 23
+
+#horizontal tunnel creator
+def create_h_tunnel(x1, x2, y):
+    global map
+    for x in range(min(x1, x2), max(x1, x2) + 1):
+        map[x][y].blocked = False
+        map[x][y].block_sight = False
+
+#vertical tunnel creator
+def create_v_tunnel(y1, y2, x):
+    global map
+    #vertical tunnel
+    for y in range(min(y1, y2), max(y1, y2) + 1):
+        map[x][y].blocked = False
+        map[x][y].block_sight = False
+
+def create_room(room):
+    global map
+    #go through the tiles in the rectangle and make them passable
+    for x in range(room.x1 + 1, room.x2):
+        for y in range(room.y1 + 1, room.y2):
+            map[x][y].blocked = False
+            map[x][y].block_sight = False
 
 
 def render_all():
@@ -73,10 +109,10 @@ def render_all():
         for x in range(MAP_WIDTH):
             wall = map[x][y].block_sight
             if wall:
-                #libtcod.console_set_char_background(con, x, y, color_dark_wall, libtcod.BKGND_SET)
+                libtcod.console_set_char_background(con, x, y, color_dark_wall, libtcod.BKGND_SET)
                 libtcod.console_put_char(con, x, y, '#', libtcod.BKGND_NONE)
             else:
-                #libtcod.console_set_char_background(con, x, y, color_dark_ground, libtcod.BKGND_SET) 
+                libtcod.console_set_char_background(con, x, y, color_dark_ground, libtcod.BKGND_SET) 
                 libtcod.console_put_char(con, x, y, '.', libtcod.BKGND_NONE)
 
     #draw everything from the objects list
